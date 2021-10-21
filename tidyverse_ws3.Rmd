@@ -1,0 +1,80 @@
+---
+title: "tidyverse_ws3"
+author: "Amanda"
+date: "21/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# install.packages("tidyverse")
+
+library(tidyverse)
+library(ggplot2)
+library(skimr)
+
+
+```
+
+#Dataset - plastics
+
+```{r, include = FALSE}
+plastics <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-26/plastics.csv')
+
+plastics<-rename(plastics, other = o)
+```
+
+# count the total countries
+
+```{r}
+country <- plastics %>% 
+  group_by(year) %>% 
+  count(country)
+
+company <- plastics %>%
+  group_by(year) %>%
+  count(parent_company)
+
+
+```
+
+
+## Data visualisation
+```{r}
+# we use ggplot2 library to produce the graph
+
+country %>%
+  ggplot(aes(x = country, y = n), fill=year) +
+  geom_col()
+
+```
+
+
+```{r}
+plastics$year <- as.factor(plastics$year)
+```
+
+```{r}
+plastics %>%
+  ggplot(aes(year, grand_total)) +
+  geom_boxplot() +
+  scale_y_log10()
+```
+
+```{r}
+volunteers <- plastics %>%
+  group_by(country, year) %>%
+  distinct(country, year, volunteers)
+
+volunteers_by_year <- volunteers %>%
+  pivot_wider(names_from = year, values_from = volunteers)
+
+volunteers_by_year <-rename(volunteers_by_year, yr2019='2019')
+volunteers_by_year <-rename(volunteers_by_year, yr2020='2020')
+
+
+country_participants <- volunteers_by_year %>% 
+  filter(is.na(yr2019) | is.na(yr2020))
+```
+
